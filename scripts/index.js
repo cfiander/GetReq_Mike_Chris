@@ -115,10 +115,15 @@ function verifyInput(searchTerm) {
   return stateCodes[term];
 }
 
+function parseSearchTerm(searchTerm) {
+  searchTerm.split(' ').map(state, verifyInput(state))
+}
+
 function watchForm() {
   $('form').submit(event => {
     event.preventDefault();
     let searchTerm = $('#js-search-term').val();
+
     searchTerm = verifyInput(searchTerm);
     const maxResults = $('#js-max-results').val();
     getParks(searchTerm, maxResults);
