@@ -70,7 +70,9 @@ const stateCodes = {
 };
 
 function createParkElements(obj) {
+    console.log(obj);
   return `<h3>${obj.fullName}</h3>
+    <h4>${obj.states}</h4>
     <p>${obj.description}</p>
     <p>${obj.url}</p>`;
 }
@@ -86,8 +88,12 @@ function getParks(searchTerm, maxResults) {
     state: searchTerm,
     limit: maxResults
   };
+  let stateCodeStr = '';
+  searchTerm.map(stateCode => {
+    stateCodeStr += `stateCode=${stateCode}&`;
+  });
   let parkList = '';
-  fetch(`https://developer.nps.gov/api/v1/parks?stateCode=ca&limit=${maxResults - 1}&q=${searchTerm}&api_key=${params.key}`)
+  fetch(`https://developer.nps.gov/api/v1/parks?${stateCodeStr}limit=${maxResults - 1}&api_key=${params.key}`)
     .then(response => {
       return response.json();
     })
@@ -97,6 +103,7 @@ function getParks(searchTerm, maxResults) {
       });
     })
     .then(() => {
+        console.log('Render');
       render(parkList);
     });
 }
@@ -116,7 +123,11 @@ function verifyInput(searchTerm) {
 }
 
 function parseSearchTerm(searchTerm) {
-  searchTerm.split(' ').map(state, verifyInput(state))
+    console.log(searchTerm.split(','));
+  return searchTerm.split(',').map((state) => {
+    state = state.trim();
+    return verifyInput(state);
+  });
 }
 
 function watchForm() {
@@ -124,7 +135,8 @@ function watchForm() {
     event.preventDefault();
     let searchTerm = $('#js-search-term').val();
 
-    searchTerm = verifyInput(searchTerm);
+    searchTerm = parseSearchTerm(searchTerm);
+    console.log(searchTerm);
     const maxResults = $('#js-max-results').val();
     getParks(searchTerm, maxResults);
   });
