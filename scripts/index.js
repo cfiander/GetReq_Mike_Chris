@@ -3,10 +3,6 @@
 const apiKey = 'bcq3DfNaarB4lSrBJbxNRkw9f3Pj0XCjG4zXPzOZ';
 const searchUrl = 'developer.nps.gov/api/v1/parks';
 
-function formatQueryParams() {
-  const queryItems = '';
-}
-
 const stateCodes = {
   'Alabama' : 'AL',
   'Alaska' : 'AK',
@@ -70,7 +66,6 @@ const stateCodes = {
 };
 
 function createParkElements(obj) {
-    console.log(obj);
   return `<h3>${obj.fullName}</h3>
     <h4>${obj.states}</h4>
     <p>${obj.description}</p>
@@ -88,27 +83,32 @@ function getParks(searchTerm, maxResults) {
     state: searchTerm,
     limit: maxResults
   };
-  let stateCodeStr = '';
-  searchTerm.map(stateCode => {
-    stateCodeStr += `stateCode=${stateCode}&`;
-  });
+  let stateCodeStr = 'stateCode=';
+  for (let i = 0; i < searchTerm.length; i++) {
+    stateCodeStr += `${searchTerm[i]}%2C`;
+  }
   let parkList = '';
-  fetch(`https://developer.nps.gov/api/v1/parks?${stateCodeStr}limit=${maxResults - 1}&api_key=${params.key}`)
+  fetch(`https://developer.nps.gov/api/v1/parks?${stateCodeStr}&limit=${maxResults - 1}&api_key=${params.key}`)
     .then(response => {
       return response.json();
     })
     .then(response => {
+      console.log(response.data);
       response.data.map(obj => {
+        console.log(obj);
         parkList += createParkElements(obj);
       });
     })
     .then(() => {
-        console.log('Render');
+      console.log('Render');
       render(parkList);
     });
 }
 
-function LetterCapitalize(str) { return str.split(' ').map((word, i) => { return word.charAt(0).toUpperCase() + word.slice(1); }).join(' '); }
+function LetterCapitalize(str) { 
+  return str.split(' ').map((word, i) => { 
+    return word.charAt(0).toUpperCase() + word.slice(1); }).join(' '); 
+}
 
 function verifyInput(searchTerm) {
   let term = LetterCapitalize(searchTerm);
@@ -123,8 +123,8 @@ function verifyInput(searchTerm) {
 }
 
 function parseSearchTerm(searchTerm) {
-    console.log(searchTerm.split(','));
-  return searchTerm.split(',').map((state) => {
+    
+    return searchTerm.split(',').map((state) => {
     state = state.trim();
     return verifyInput(state);
   });
@@ -136,7 +136,6 @@ function watchForm() {
     let searchTerm = $('#js-search-term').val();
 
     searchTerm = parseSearchTerm(searchTerm);
-    console.log(searchTerm);
     const maxResults = $('#js-max-results').val();
     getParks(searchTerm, maxResults);
   });
